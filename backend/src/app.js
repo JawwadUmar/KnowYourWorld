@@ -1,21 +1,55 @@
-require("dotenv").config();
-const express = require("express");
-const app = express();
-const axios = require("axios");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+import dotenv from "dotenv";
+import express from "express";
+import axios from "axios";
+import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+dotenv.config();
+
+const app = express();
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GOOGLE_API_KEY,
+});
+
+const PYTHON_API = "http://127.0.0.1:8000/extract";
+
+const PROMPT_TEMPLATE = `
+Generate 5 challenging UPSC questions based on the study material provided.
+
+Requirements:
+- Questions should test conceptual understanding.
+- Number the questions.
+- After all questions, provide detailed solutions.
+- Return the response in clean Markdown.
+- Use headings, bullet points, and code blocks only if necessary.
+`;
 
 app.get("/", async (req, res) => {
-    let { data } = await axios.get("http://127.0.0.1:8000/extract");
-    data = data + "generate 5 tough questions for the students who are preparing for upsc examinations. Consider the above data as study material. at the end of 5 questions provide the soluition. also I'm sending the data from your response as res.send directly, so format it accordingly to show in my website";
-    res.send(await generateContent(data));
+  try {
+    const { data: studyMaterial } = await axios.get(PYTHON_API);
+
+    const prompt = `${studyMaterial}\n\n${PROMPT_TEMPLATE}`;
+
+    const response = await generateContent(prompt);
+
+    res.send(response);
+  } catch (error) {
+    console.error("Error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to generate questions.",
+    });
+  }
 });
 
 async function generateContent(prompt) {
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+  const response = await ai.models.generateContent({
+    model: "gemini-3.5-flash",
+    contents: prompt,
+  });
+
+  return response.text;
 }
 
-module.exports = app;
+export default app;

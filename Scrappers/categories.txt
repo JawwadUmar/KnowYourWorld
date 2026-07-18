@@ -1,0 +1,13 @@
+astrology
+cricket
+education
+entertainment
+ht-img
+ht-insight
+htcity
+india-news
+lifestyle
+sports
+trending
+videos
+world-news
