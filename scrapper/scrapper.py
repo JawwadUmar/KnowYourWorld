@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask
 import requests
 import re
 from bs4 import BeautifulSoup
@@ -29,8 +29,9 @@ def extract():
         if link.startswith("https://www.hindustantimes.com/") and link.endswith(".html"):
             path = urlparse(link).path
             category = path.strip("/").split("/")[0]
-            print("Category: " + category)
             categories.add(category)
+            if(category != "world-news" and category != "india-news" and category != "sports"):
+                continue
             try:
                 htmlPageResponse = requests.get(link, headers=HEADERS, timeout=10)
                 htmlPageText:str = htmlPageResponse.text

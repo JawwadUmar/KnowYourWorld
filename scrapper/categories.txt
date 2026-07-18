@@ -1,12 +1,14 @@
 astrology
+cities
 cricket
 education
 entertainment
+environment
 ht-img
-ht-insight
 htcity
 india-news
 lifestyle
+photos
 sports
 trending
 videos
